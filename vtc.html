@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VTC Income & Profitability Calculator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary: #00c389;
+      --primary-dark: #009a6b;
+      --background: #f9fafc;
+      --text: #1e1e1e;
+      --input-bg: #ffffff;
+      --border: #dddddd;
+      --box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 30px;
+    }
+
+    .lang-switch {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .calculator {
+      max-width: 720px;
+      margin: auto;
+      background: var(--input-bg);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: var(--box-shadow);
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: 500;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background-color: #fefefe;
+      font-size: 15px;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 14px;
+      width: 100%;
+      background-color: var(--primary);
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .result {
+      margin-top: 30px;
+      padding: 25px;
+      background-color: #ffffff;
+      border-left: 6px solid var(--primary);
+      border-radius: 12px;
+      box-shadow: var(--box-shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #eaeaea;
+    }
+
+    th {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .export-buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .export-buttons button {
+      flex: 1;
+      background-color: #34495e;
+    }
+
+    .export-buttons button:hover {
+      background-color: #2c3e50;
+    }
+
+    @media screen and (max-width: 600px) {
+      .calculator {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="lang-switch">
+    <button onclick="setLanguage('en')">English</button>
+    <button onclick="setLanguage('fr')">Français</button>
+    <button onclick="setLanguage('ar')">العربية</button>
+  </div>
+
+  <h1 id="title">VTC Income & Profitability Calculator</h1>
+  <div class="calculator" id="form">
+    <!-- Inputs -->
+    <div id="inputs"></div>
+    <button onclick="calculateIncome()" id="calculateBtn">Calculate</button>
+    <div class="result" id="resultBox" style="display:none;">
+      <h3 id="summaryTitle">Summary Table</h3>
+      <table><thead><tr><th>Item</th><th>Hourly (DA)</th><th>Yearly (DA)</th></tr></thead><tbody id="resultBody"></tbody></table>
+      <div class="export-buttons">
+        <button onclick="exportToPDF()">Download PDF</button>
+        <button onclick="exportToExcel()">Download Excel</button>
+      </div>
+    </div>
+  </div>
+  <script src="vtc.js"></script>
+</body>
+</html>

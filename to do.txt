@@ -1,0 +1,11 @@
+---->>>next step<<<----
+done correct pdf  
+done index.htmklk become vtc.html and nnew index thget will point vtc.html 
+done restaurant.html 
+done session saving
+done default values 
+done support more laguages 
+done isolate js 
+add more currencies 
+mobile app creatoin 
+online hosting 
