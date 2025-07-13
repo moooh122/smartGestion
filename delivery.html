@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Delivery Driver Profitability Calculator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary: #3498db;
+      --primary-dark: #2980b9;
+      --bg: #f9f9f9;
+      --text: #2c3e50;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 20px;
+      color: var(--text);
+    }
+
+    .calculator {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 12px;
+      margin-top: 20px;
+      width: 100%;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .result {
+      margin-top: 30px;
+      padding: 20px;
+      background: #fff;
+      border-left: 6px solid var(--primary);
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .export-buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .lang-switch {
+      display: flex;
+      justify-content: flex-end;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .lang-switch select {
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+
+    .home-button {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .home-button a {
+      text-decoration: none;
+      color: var(--primary);
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 20px; }
+      input, button { font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="lang-switch">
+  <select onchange="switchLanguage(this.value)">
+    <option value="en">🇬🇧 EN</option>
+    <option value="fr">🇫🇷 FR</option>
+    <option value="ar">🇩🇿 AR</option>
+  </select>
+</div>
+
+<h1 id="title">Delivery Driver Profitability Calculator</h1>
+
+<div class="calculator">
+  <label id="lblHourlyIncome">Hourly Income (DA):</label>
+  <input type="number" id="hourlyIncome" />
+
+  <label id="lblAppCommission">App Commission (%):</label>
+  <input type="number" id="appCommission" />
+
+  <label id="lblHoursPerWeek">Hours Worked per Week:</label>
+  <input type="number" id="hoursPerWeek" />
+
+  <label id="lblWeeksPerYear">Weeks Worked per Year:</label>
+  <input type="number" id="weeksPerYear" />
+
+  <label id="lblKmPerHour">Kilometers per Hour:</label>
+  <input type="number" id="kmPerHour" />
+
+  <label id="lblFuelPrice">Fuel Price (DA/L):</label>
+  <input type="number" id="fuelPrice" />
+
+  <label id="lblFuelConsumption">Fuel Consumption (L/100km):</label>
+  <input type="number" id="fuelConsumption" />
+
+  <label id="lblMaintenanceCost">Maintenance Cost per Service (DA):</label>
+  <input type="number" id="maintenanceCost" />
+
+  <label id="lblMaintenanceKm">Maintenance every (KM):</label>
+  <input type="number" id="maintenanceKmInterval" />
+
+  <label id="lblInsurance">Annual Insurance (DA):</label>
+  <input type="number" id="insuranceCost" />
+
+  <label id="lblTax">Annual Taxes (DA):</label>
+  <input type="number" id="taxCost" />
+
+  <label id="lblPhone">Monthly Phone Fees:</label>
+  <input type="number" id="phoneFees" />
+
+  <label id="lblParking">Monthly Parking Fees:</label>
+  <input type="number" id="parkingFees" />
+
+  <label id="lblInvestment">Initial Investment (DA):</label>
+  <input type="number" id="investment" />
+
+  <button onclick="calculate()">Calculate</button>
+
+  <div class="result" id="resultBox" style="display:none;">
+    <p><strong>Net Hourly Profit:</strong> <span id="netHourly">0</span> DA</p>
+    <p><strong>Net Yearly Profit:</strong> <span id="netYearly">0</span> DA</p>
+    <p><strong>Profitability Ratio:</strong> <span id="profitability">0</span>%</p>
+
+    <div class="export-buttons">
+      <button onclick="exportPDF()">📄 PDF</button>
+      <button onclick="exportExcel()">📊 Excel</button>
+    </div>
+  </div>
+
+  <div class="home-button">
+    <a href="index.html">🏠 Home</a>
+  </div>
+</div>
+
+<script>
+  const fields = [
+    "hourlyIncome", "appCommission", "hoursPerWeek", "weeksPerYear",
+    "kmPerHour", "fuelPrice", "fuelConsumption", "maintenanceCost", "maintenanceKmInterval",
+    "insuranceCost", "taxCost", "phoneFees", "parkingFees", "investment"
+  ];
+
+  function calculate() {
+    const val = id => parseFloat(document.getElementById(id).value) || 0;
+    fields.forEach(id => localStorage.setItem(id, document.getElementById(id).value));
+
+    const hourlyIncome = val("hourlyIncome");
+    const commission = val("appCommission") / 100;
+    const hoursPerWeek = val("hoursPerWeek");
+    const weeksPerYear = val("weeksPerYear");
+    const kmPerHour = val("kmPerHour");
+    const fuelPrice = val("fuelPrice");
+    const fuelConsumption = val("fuelConsumption");
+    const maintenanceCost = val("maintenanceCost");
+    const maintenanceKm = val("maintenanceKmInterval");
+    const insurance = val("insuranceCost");
+    const taxes = val("taxCost");
+    const phone = val("phoneFees") * 12;
+    const parking = val("parkingFees") * 12;
+    const investment = val("investment");
+
+    const yearlyHours = hoursPerWeek * weeksPerYear;
+    const yearlyIncome = hourlyIncome * yearlyHours * (1 - commission);
+    const yearlyKm = kmPerHour * yearlyHours;
+    const yearlyFuelCost = (yearlyKm * fuelConsumption / 100) * fuelPrice;
+    const yearlyMaintenance = Math.floor(yearlyKm / maintenanceKm) * maintenanceCost;
+    const totalCosts = yearlyFuelCost + yearlyMaintenance + insurance + taxes + phone + parking;
+    const netYearly = yearlyIncome - totalCosts;
+    const netHourly = netYearly / yearlyHours;
+    const profitability = investment ? (netYearly / investment) * 100 : 0;
+
+    document.getElementById("netYearly").textContent = netYearly.toFixed(2);
+    document.getElementById("netHourly").textContent = netHourly.toFixed(2);
+    document.getElementById("profitability").textContent = profitability.toFixed(2);
+    document.getElementById("resultBox").style.display = "block";
+  }
+
+  function exportPDF() {
+    html2pdf().from(document.getElementById("resultBox")).set({
+      filename: "delivery-report.pdf",
+      margin: 0.5,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    }).save();
+  }
+
+  function exportExcel() {
+    const data = [
+      ["Item", "Amount"],
+      ["Net Hourly Profit", document.getElementById("netHourly").textContent + " DA"],
+      ["Net Yearly Profit", document.getElementById("netYearly").textContent + " DA"],
+      ["Profitability Ratio", document.getElementById("profitability").textContent + " %"]
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Report");
+    XLSX.writeFile(wb, "delivery-profitability.xlsx");
+  }
+
+  function switchLanguage(lang) {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  }
+
+  // Restore saved inputs
+  window.onload = () => {
+    fields.forEach(id => {
+      const saved = localStorage.getItem(id);
+      if (saved !== null) document.getElementById(id).value = saved;
+    });
+  };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Barbershop Investment Calculator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    :root {
+      --primary: #4caf50;
+      --primary-dark: #388e3c;
+      --bg: #fefefe;
+      --text: #2c3e50;
+      --shadow: rgba(0,0,0,0.05) 0 2px 10px;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fb;
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .lang-switch {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .lang-switch button {
+      border: none;
+      background: #4caf50;
+      cursor: pointer;
+      font-size: 20px;
+    }
+    .lang-switch {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.lang-switch select {
+  padding: 6px 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+    .calculator {
+      max-width: 700px;
+      margin: auto;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      font-weight: 500;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 14px;
+      background-color: var(--primary);
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .result {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #fff;
+      border-left: 6px solid var(--primary);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    .export-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 14px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="title">Barbershop Investment Calculator</h1>
+
+  <div class="lang-switch">
+    <select onchange="switchLanguage(this.value)">
+      <option value="en">🇺🇸 English</option>
+      <option value="fr">🇫🇷 Français</option>
+      <option value="ar">🇩🇿 العربية</option>
+    </select>
+  </div>
+  
+
+  <div class="calculator">
+    <label id="lblRevenue" for="monthlyRevenue">Monthly Revenue (DA):</label>
+    <input type="number" id="monthlyRevenue" />
+
+    <label id="lblRent" for="monthlyRent">Monthly Rent (DA):</label>
+    <input type="number" id="monthlyRent" />
+
+    <label id="lblSalaries" for="monthlySalaries">Monthly Salaries (DA):</label>
+    <input type="number" id="monthlySalaries" />
+
+    <label id="lblUtilities" for="monthlyUtilities">Monthly Utilities (DA):</label>
+    <input type="number" id="monthlyUtilities" />
+
+    <label id="lblProducts" for="monthlyProducts">Hair Products & Supplies (DA):</label>
+    <input type="number" id="monthlyProducts" />
+
+    <label id="lblOther" for="otherMonthly">Other Monthly Expenses (DA):</label>
+    <input type="number" id="otherMonthly" />
+
+    <label id="lblInvestment" for="investment">Initial Investment (DA):</label>
+    <input type="number" id="investment" />
+
+    <button onclick="calculateBarbershop()" id="btnCalc">Calculate</button>
+
+    <div id="results" class="result" style="display:none;">
+      <p><strong id="lblNetMonthly">Monthly Net Profit:</strong> DA <span id="netMonthly">0</span></p>
+      <p><strong id="lblNetYearly">Yearly Net Profit:</strong> DA <span id="netYearly">0</span></p>
+      <p><strong id="lblProfit">Profitability Ratio:</strong> <span id="profitability">0</span>%</p>
+
+      <div class="export-buttons">
+        <button onclick="exportPDF()">📄 PDF</button>
+        <button onclick="exportExcel()">📊 Excel</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2025 SmartGestion – Barbershop Module
+  </footer>
+
+  <script>
+    const ids = [
+      "monthlyRevenue", "monthlyRent", "monthlySalaries",
+      "monthlyUtilities", "monthlyProducts", "otherMonthly", "investment"
+    ];
+
+    const texts = {
+      en: {
+        title: "Barbershop Investment Calculator",
+        lblRevenue: "Monthly Revenue (DA):",
+        lblRent: "Monthly Rent (DA):",
+        lblSalaries: "Monthly Salaries (DA):",
+        lblUtilities: "Monthly Utilities (DA):",
+        lblProducts: "Hair Products & Supplies (DA):",
+        lblOther: "Other Monthly Expenses (DA):",
+        lblInvestment: "Initial Investment (DA):",
+        btnCalc: "Calculate",
+        lblNetMonthly: "Monthly Net Profit:",
+        lblNetYearly: "Yearly Net Profit:",
+        lblProfit: "Profitability Ratio:"
+      },
+      fr: {
+        title: "Calculateur d'Investissement Coiffure",
+        lblRevenue: "Revenu mensuel (DA):",
+        lblRent: "Loyer mensuel (DA):",
+        lblSalaries: "Salaires mensuels (DA):",
+        lblUtilities: "Factures mensuelles (DA):",
+        lblProducts: "Produits et fournitures (DA):",
+        lblOther: "Autres dépenses mensuelles (DA):",
+        lblInvestment: "Investissement initial (DA):",
+        btnCalc: "Calculer",
+        lblNetMonthly: "Profit mensuel net:",
+        lblNetYearly: "Profit annuel net:",
+        lblProfit: "Taux de rentabilité:"
+      },
+      ar: {
+        title: "حاسبة استثمار محل الحلاقة",
+        lblRevenue: "الإيرادات الشهرية (دج):",
+        lblRent: "الإيجار الشهري (دج):",
+        lblSalaries: "الرواتب الشهرية (دج):",
+        lblUtilities: "فواتير الخدمات (دج):",
+        lblProducts: "المنتجات والمستلزمات (دج):",
+        lblOther: "نفقات شهرية أخرى (دج):",
+        lblInvestment: "رأس المال الأولي (دج):",
+        btnCalc: "احسب",
+        lblNetMonthly: "الربح الشهري الصافي:",
+        lblNetYearly: "الربح السنوي الصافي:",
+        lblProfit: "نسبة الربحية:"
+      }
+    };
+
+    function calculateBarbershop() {
+      const val = id => parseFloat(document.getElementById(id).value) || 0;
+      ids.forEach(id => localStorage.setItem(id, document.getElementById(id).value));
+
+      const revenue = val("monthlyRevenue");
+      const costs = val("monthlyRent") + val("monthlySalaries") + val("monthlyUtilities") + val("monthlyProducts") + val("otherMonthly");
+      const netMonthly = revenue - costs;
+      const netYearly = netMonthly * 12;
+      const investment = val("investment");
+      const profitability = investment ? (netYearly / investment) * 100 : 0;
+
+      document.getElementById("netMonthly").textContent = netMonthly.toFixed(2);
+      document.getElementById("netYearly").textContent = netYearly.toFixed(2);
+      document.getElementById("profitability").textContent = profitability.toFixed(2);
+      document.getElementById("results").style.display = "block";
+    }
+
+    function exportPDF() {
+      const el = document.getElementById("results");
+      html2pdf().from(el).set({
+        filename: 'barbershop-report.pdf',
+        margin: 0.5,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      }).save();
+    }
+
+    function exportExcel() {
+      const data = [
+        ["Item", "Amount (DA)"],
+        ["Monthly Net Profit", document.getElementById("netMonthly").textContent],
+        ["Yearly Net Profit", document.getElementById("netYearly").textContent],
+        ["Profitability Ratio", document.getElementById("profitability").textContent + "%"]
+      ];
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Report");
+      XLSX.writeFile(wb, "barbershop-report.xlsx");
+    }
+
+    function switchLanguage(lang) {
+      const t = texts[lang];
+      for (const key in t) {
+        const el = document.getElementById(key);
+        if (el) el.innerHTML = t[key];
+      }
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    }
+
+    window.onload = () => {
+      ids.forEach(id => {
+        const val = localStorage.getItem(id);
+        if (val) document.getElementById(id).value = val;
+      });
+    };
+  </script>
+</body>
+</html>
